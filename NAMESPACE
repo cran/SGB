@@ -1,0 +1,8 @@
+import(stats, MASS, numDeriv, alabama, Formula)
+importFrom("graphics", "abline", "hist", "lines", "plot")
+S3method(print, regSGB)
+S3method(summary, regSGB)
+S3method(regSGB, default)
+S3method(regSGB, formula)
+S3method(print, testSGB)
+exportPattern("^[[:alpha:]]+")

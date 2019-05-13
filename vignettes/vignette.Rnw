@@ -1,0 +1,616 @@
+  % !Rnw weave = knitr
+  %\VignetteIndexEntry{SGB multivariate regression}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteKeyword{Regression}
+  %\VignetteKeyword{Multivariate Techniques}
+
+
+\documentclass[10pt,a4paper]{article}
+\usepackage{natbib}
+%%\usepackage{alltt}
+\usepackage[ansinew]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+
+
+%****************************************************************
+
+\def \cA {{\cal A}}
+\def \cB {{\cal B}}
+\def \cX {{\cal X}}
+\def \cT {{\cal T}}
+\def \cI {{\cal I}}
+\def \cF {{\cal F}}
+\def \cJ {{\cal J}}
+\def \cN {{\cal N}}
+\def \cR {{\cal R}}
+\def \cY {{\cal Y}}
+
+\def \RR {I\!\!R}
+\def \NN {I\!\!N}
+
+\def \balpha {\boldsymbol\alpha}
+\def \bbeta {\boldsymbol\beta}
+\def \bpsi {\boldsymbol\psi}
+\def \bzheta {\boldsymbol \theta}
+\def \bomega {\boldsymbol\omega}
+\def \bDelta {\boldsymbol\Delta}
+\def \bdelta {\boldsymbol\delta}
+\def \bmu {\boldsymbol\mu}
+\def \bepsilon {\boldsymbol\epsilon}
+\def \blambda {\boldsymbol\lambda}
+\def \bGamma {\boldsymbol\Gamma}
+
+\def \b1 {{\mathbf 1}}
+\def \ba {{\mathbf a}}
+\def \bA {{\mathbf A}}
+\def \bB {{\mathbf B}}
+\def \bb {{\mathbf b}}
+\def \bc {{\mathbf c}}
+\def \be {{\mathbf e}}
+\def \bG {{\mathbf G}}
+\def \bH {{\mathbf H}}
+\def \bI {{\mathbf I}}
+\def \bJ {{\mathbf J}}
+\def \br {{\mathbf r}}
+\def \bp {{\mathbf p}}
+\def \bP {{\mathbf P}}
+\def \bq {{\mathbf q}}
+\def \bM {{\mathbf M}}
+\def \bX {{\mathbf X}}
+\def \bx {{\mathbf x}}
+\def \by {{\mathbf y}}
+\def \bY {{\mathbf Y}}
+\def \bu {{\mathbf u}}
+\def \bt {{\mathbf t}}
+\def \bT {{\mathbf T}}
+\def \bz {{\mathbf t}}
+\def \bU {{\mathbf U}}
+\def \bv {{\mathbf v}}
+\def \bV {{\mathbf V}}
+\def \bZ {{\mathbf Z}}
+\def \bz {{\mathbf z}}
+\def \bW {{\mathbf W}}
+\def \bw {{\mathbf w}}
+
+\def\uno{\mathbf 1}
+\def\cero{\mathbf 0}
+\def\diag{\mathrm{diag}}
+\def\rank{\mathrm{rank}}
+\def\tr{\mathrm{tr}}
+\def\E{\mathrm{E}}
+\def\V{\mathrm{Var}}
+\def\Cov{\mathrm{Cov}}
+\def \dd {\mathrm{d}}
+\def\alr{\mathrm{alr}}
+\def\ilr{\mathrm{ilr}}
+\def\totvar{\mathrm{totvar}}
+
+\def\DIR{\hbox{\scriptsize{DIR}}}
+\def\EB{\hbox{\scriptsize{EB}}}
+\def\EBLN{\hbox{\scriptsize{EBLN}}}
+\def\EBGB2{\hbox{\scriptsize{EBGB2}}}
+
+\theoremstyle{plain}
+\newtheorem{remark}{Remark}
+\newtheorem{prop}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{coro}{Corollary}
+\newtheorem{lemm}{Lemma}
+\newtheorem{definition}{Definition}
+\setlength{\oddsidemargin}{-1.6mm}
+\setlength{\textwidth}{16.0cm}
+\setlength{\textheight}{23.5cm}
+\setlength{\topmargin}{-1.25cm} \setlength{\baselineskip}{1mm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.25cm}
+
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+\begin{document}
+
+\title{SGB multivariate regression}
+\author{Monique Graf \\ Institut de statistique \\ Universit\'e de Neuch\^atel, Switzerland}
+\maketitle
+\bigskip
+{\centerline{\bf Abstract}}
+
+\begin{quote}
+The main features of the \texttt{R}-package {\bf SGB} are described. A new distribution on the simplex is defined, the Simplicial Generalized Beta distribution (SGB). A regression procedure based on the SGB for compositions as dependent vectors is set up. Package {\bf SGB} offers an imputation method for missing sub-compositions, graphical diagnostic checks and goodness of fit tests. A stepwise regression  for backward elimination permits to simplify the model.
+
+\medskip
+
+{\bf Key words: } Probability Distributions, Multivariate Techniques, Regression, Statistical Inference. \par
+
+\end{quote}
+
+\nocite{Ait1986} %
+\nocite{Monti2011} %
+\nocite{Mad2004} %
+\nocite{Gueo2008} %
+\nocite{Boog2014} %
+\nocite{NgTianTang2011} %
+\nocite{WickerMKP08} %
+\nocite{Huber1967} %
+\nocite{numder2016}%
+\nocite{Vara2015} %
+\nocite{GrKosZei2012} %
+\nocite{Zeileis2010}
+\nocite{Graf2011}
+\nocite{Graf2017} %
+\nocite{Craiu1969}
+\nocite{KBJ2000} %
+\nocite{Hijazi2009} %
+\nocite{EgoPaw2003} %
+\nocite{EgoPaw2011} %
+\nocite{Maier2015} %
+\nocite{MorTho2019} %
+
+\section{Introduction}
+Compositions are multivariate constrained data. Each observation is a positive vector with constant sum (it is said to be {\it closed}) and this peculiarity requires special analytical methods. A seminal reference is \cite{Ait1986} who developed tools based on log-ratios of parts and the logistic normal distribution, i.e. ratios of parts are log-normally distributed. A quick introduction to the geometry in the simplex is given e.g. by \cite{EgoPaw2011}. An alternative to the logistic normal is the Dirichlet distribution, see a modern account in \cite{NgTianTang2011}. \cite{Hijazi2009} allow the Dirichlet parameters to depend on auxiliary variables and \cite{Gueo2008} propose several diagnostic procedures. \cite{Monti2011} defined the scaled Dirichlet by introducing a constant scale composition. The Beta distribution is a special case of Dirichlet for two-parts compositions. 
+
+Several \texttt{R}-packages exist in the topic of compositions: the general purpose \texttt{R}-package {\bf compositions} \citep{Boog2014} gives the possibility to fit a Dirichlet distribution without covariates. The  \texttt{R}-package {\bf robCompositions} \citep{TemplHronFil2011}  specializes on robust methods and offers only the logistic normal when a distribution needs to be specified. The package {\bf betareg} \citep{GrKosZei2012} proposes regression models based on the Beta distribution, where both the scale composition and the shape parameters can be modeled with explanatory variables. Finally, Dirichlet regressions for the shape parameters are proposed in {\bf DirichletReg} \citep{Maier2015}. 
+
+In the present \texttt{R}-package {\bf SGB}, a more flexible generalization of the Dirichlet distribution is developed. It is called the {\it simplicial generalized Beta} (SGB). \cite{Craiu1969}, see \cite[p. 490]{KBJ2000}, obtained the density and called it "generalized Dirichlet". The SGB parameters encompass an overall shape parameter $a$, a scale composition $\bb$, and a vector of Dirichlet shape parameters $\bp$. 
+ 
+%The scale composition can be modeled with auxiliary variables through a log-ratio transformation, permitting to set up SGB regression models. With the help of a fitted model on full data, imputation of missing parts is possible. A backward stepwise regression procedure permits to eliminate non significant regression parameters. 
+
+In the Dirichlet and the scaled Dirichlet regressions, the shape parameters are modeled with auxiliary variables. On the other hand, in the ordinary logistic normal regression, it is the scale composition that is made dependent on auxiliary variables. The modeling of scales seems easier to interpret than the modeling of shapes. Thus in the SGB regression: 
+\begin{itemize}
+\item  The scale composition are modeled in the same way as for the logistic normal regression, i.e. each auxiliary variable generates $D-1$ parameters, where $D$ is the number of parts. 
+\item  The $D$ Dirichlet shape parameters, one for each part in the compositions, are estimated as well.
+\item  An additional overall shape parameter is introduced in the SGB.
+\item Use of survey weights is an option. 
+\item A backward stepwise regression procedure permits to eliminate non significant regression parameters.
+\item Imputation of missing parts is possible.
+\end{itemize}
+ The SGB distribution is defined in Section \ref{SGB}. In Section \ref{regSGB}, the SGB regression procedure is briefly described. In Section \ref{Examples}, examples of the main features of the package are given.
+
+\section{SGB distribution} \label{SGB}
+
+ The Dirichlet distribution can be viewed as the distribution of $\bU=\mathcal{C}(\bY)$, where $\bY=(Y_j)_{j=1,...,D}$ is a vector of independent $Gamma(p_j)$ components and $\mathcal{C}(.)$ is the closure operation (i.e. $U_j=Y_j/\sum_{i=1}^D Y_i$). The SGB distribution follows the same construction, with the Gamma distribution replaced by the generalized Gamma, that is the underlying $Y_i$ are independent $GG(a,c\,b_j,p_j)$, $c$ being an arbitrary positive constant. The parameters are all positive and $\bb=(b_1,...,b_D)$ is itself a composition, the {\it scale composition}. The SGB can also be generated from the Dirichlet
+ 
+\paragraph{Definition} {\it 
+Suppose that $\bZ=(Z_1,...,Z_D)$ follows a $Dirichlet(p_1,...,p_D)$ distribution. Then the random composition $\bU=(U_1,...,U_D)$, $(D \geq 2)$, given by 
+$$U_j=\frac{b_j\, Z_j^{1/a}}{\sum_{i=1}^D b_i\, Z_i^{1/a} },j=1,...,D \quad 
+\text{or} \quad
+\bU = \mathcal{C}[\bb \,\bZ^{1/a}]$$
+follows a  $SGB(a, \{b_j,p_j,j=1,...,D\})$ distribution.
+
+All parameters are positive; $a$ is an overall shape parameter, $\bb=(b_1,...,b_D)$ a scale composition and $\bp=(p_1,...,p_D)$ the vector of Dirichlet shape parameters.
+}
+
+\vskip 2mm
+Conversely, the random composition $\bZ$ can be written in function of $\bU$, 
+\begin{equation} \label{sreg}
+ Z_j=\frac{(U_j/b_j)^a}{\sum_{i=1}^D (U_i/b_i)^a}, j=1,...,D \quad\text{or} \quad \bZ = \mathcal{C}[(\bU/\bb)^a].
+\end{equation}
+
+Because $U_D= 1-\sum_{j=1}^{D-1} U_j$, there are only $D-1$ variables in the composition $\bU$. The  $L_a$-norm of the vector $\left(\bu /\bb \right)$
+is
+\begin{eqnarray*}
+  \Arrowvert\bu/\bb\Arrowvert_a &=&\left[\sum_{k=1}^{D-1}(u_k/b_k)^{a} + \left((1-\sum_{j=1}^{D-1}u_j)/b_D\right)^{a}\right]^{1/a}.
+\end{eqnarray*}
+
+The probability density of the $SGB(a, \{b_j,p_j,j=1,...,D\})$ distribution is obtained as
+\begin{eqnarray}
+&& f_\bU(\bu_{-D}) =   \nonumber \\
+&&
+\frac{\Gamma(P)a^{D-1}}{\prod_{j=1}^D \Gamma(p_j)}
+\prod_{k=1}^{D-1} \left\{\frac{u_k/b_k}{\Arrowvert\bu/\bb\Arrowvert_a}\right\}^{ap_k} \left\{\frac{\left(1-\sum_{j=1}^{D-1}u_j\right)/b_D}{\Arrowvert\bu/\bb\Arrowvert_a}\right\}^{ap_D} \frac{1}{\prod_{k=1}^{D-1}u_k \left(1-\sum_{j=1}^{D-1}u_j\right)},\\  \label{CLGa}
+&& \qquad \qquad \qquad \qquad u_k > 0,\, k=1,...,D-1, \qquad 1-\sum_{j=1}^{D-1}u_j > 0. \nonumber
+\end{eqnarray}
+ 
+Consider the so called Aitchison's expectation, i.e. the image in the simplex of the expectation of centered log-composition,
+$$\hat{\bU} = \E_A(\bU)= \mathcal{C}\{ \exp\{\E\log[\bU/g(\bU)]\}\},$$
+
+In the SGB context, with $\psi(.)$ the digamma function, one obtains
+\begin{equation} \label{EU2}
+ {\E}_A(U_k) = \frac{b_k \, \exp\{\psi(p_k)/a \} }
+ {\sum_{j=1}^D b_j \exp \{\psi(p_j)/a \} } \quad k=1,...,D.
+\end{equation}
+The fitted composition $\hat{\bU}$ is defined as the estimated value of $\E_A(\bU)$ obtained by plugging estimated parameters into the formula.
+
+Consider a random composition $\bU$ following a SGB distribution with known parameters. Suppose that only a sub-composition $\bv$ of a realization $\bu$ is observed, and let $\bw$ be  the sub-composition  with the missing parts. We  have $\bu=(x\bv,(1-x)\bw), \, 0<x<1$, realization of $\bU=\left(X\bV , (1-X)\bW\right), \, 0<X<1$. One can show that $X$ follows a SGB distribution as well, and that the random sub-compositions $\bV$ and $\bW$ are independent \citep[Theorem 4]{Graf2017}. The best guess for $\bw$ is thus given by $\widehat{\bw}={\E}_A(\bW)$ (see Equation \ref{EU2}). Then the imputed composition is
+\begin{equation}
+\E_A(\bU | \bv) \doteq \widehat{\bu} = \left(\widehat{x}_{\bv} \bv \,, \, (1-\widehat{x}_{\bv})\widehat{\bw} \right),
+\label{imput}
+\end{equation}
+where $\widehat{x}_{\bv} = {\E}_A\left(\left. X \right\rvert \bV=\bv,\bW=\widehat{\bw} \right)$, see \citep[Theorem 4 (5)]{Graf2017}.
+The imputed composition can be viewed as the {\it conditional Aitchison's expectation given the sub-composition $\bv$}.
+Equation \eqref{imput} extends to the case of a totally missing composition and is then identical to Equation \eqref{EU2}.
+
+
+\section{SGB regression model} \label{regSGB}
+In the \texttt{R}-package {\bf SGB} regression models can be set up for the scale composition $\bb$. The shape parameters $a$ and $\bp$ are estimated as well, but are supposed constant across compositions. 
+
+\subsection{Model}
+The SGB regression models follow the principles of log-ratio analysis advocated by \cite{Ait1986}. We define a general $D \times (D-1)$ contrast matrix $\bV$, such that 
+$$\uno_D^t \bV  = \cero^t_{D-1},$$
+where $\uno_D$ is a $D$-vector of ones and $\cero_{D-1}$ is a $(D-1)$-vector of zeros.
+The model for scales is the general linear model. Let $\bX$ be a $n \times p$ matrix of explanatory variables, where $n$ is the sample size. Let $\bu_i, i=1,...,n$ be the composition associated to $\bx_i^t$, the i-th row of $\bX$. Then the scales are modeled by
+\begin{equation} \label{modb}
+\log(\bb_i^t) \bV = \bx_i^t \bB,
+\end{equation}
+where $$\bB=\left(\bbeta_1 ... \bbeta_{D-1}\right)$$
+is the $p \times (D-1)$ - matrix of regression parameters for the $(D-1)$ contrasts, columns of $\log(\bu_i^t )\bV, i=1,...,n$.
+
+
+\subsection{Fitting procedure}
+There is the possibility to introduce sampling weights into the procedure. These weights $w_i, i=1,...,n$ are scaled to sum to $n$.
+
+The pseudo-log-likelihood is the weighted version of the log-likelihood and  is given by
+\begin{eqnarray}
+& & \ell\left(a,(b_1,p_1),...,(b_D,p_D)|\bu_{i,-D}, i=1,...,n \right) \nonumber \\
+&=&
+n\left[(D-1)\log(a) + \log \Gamma(P) - \sum_{k=1}^D \log \Gamma(p_k)\right]  + \sum_{i=1}^n w_i \sum_{k=1}^D p_k \log z_k(\bu_i)   \nonumber \\
+ & & - \text{ terms not depending on parameters.} \nonumber
+\end{eqnarray}
+with $z(\bu_i)=(z_1(\bu_i),...,z_D(\bu_i))$ given at Equation \eqref{sreg} and $P=\sum_{j=1}^D p_j$.
+
+The model is estimated by maximizing the pseudo-likelihood using a constrained optimization method, the augmented Lagrangian, see e.g. \cite{Mad2004}, and implemented in the \texttt{R}-package {\bf alabama} as function \texttt{auglag} \citep{Vara2015}. The gradient is computed analytically and the Hessian numerically. The default constraints are
+\begin{eqnarray*}
+a &>& 0.1 \quad \text{(to avoid numerical problems)} \\
+p_j &>& 0, \quad j=1 ,..., D \\
+a\,p_j &>& \texttt{bound},  \quad \text{by default, } \texttt{bound}=2.1.
+\end{eqnarray*}
+
+Moments of  ratios of parts following the SGB distribution only exist up to $a\,p_j$. Thus \texttt{bound} = 2.1 guarantees the existence of variances of all ratios of parts. Notice that the most important variables, the log-ratios of parts, possess moment of all orders.
+ 
+\subsection{Initial values}
+The initial values of the regression parameters $\bB$ are estimated by multiple linear regression using the weights if specified. Several proposals are found for the choice of initial values when fitting a Dirichlet model. The method by \cite{WickerMKP08} has been adapted to the SGB for the initial values of the Dirichlet shape parameters $p_1,...,p_D$. 
+The overall shape parameter $a$ must be chosen by the user.
+
+A very handy feature of \texttt{alabama::auglag} is that the initial values need not satisfy the constraints, and that general (twice derivable) constraints on parameters can be introduced. The price to pay is the speed.
+
+
+\section{Examples}\label{Examples}
+\subsection{Regression with arbitrary log-ratio transform}\label{sec41}
+In the data set \texttt{carseg} \citep{MorTho2019} segment shares of car sales in five categories (SA, SB, ... ,SE) according to the size of the car chassis during 152 months, as well as seven economic variables are given. The file with compositions is \texttt{uc}.  Multiplying the log-compositions by the matrix \texttt{Vc}, we obtain  the log-ratios between two adjacent categories. It is important to name the columns of \texttt{Vc}; they will be used to document the parameter estimates and to specify the model.
+<<>>=
+library(SGB)
+data(carseg)
+## Extract the compositions
+uc <- as.matrix(carseg[,(1:5)])
+## Define the log-ratio transformation matrix
+Vc <- matrix(c( 1,0,0,0,
+               -1,1,0,0,
+               0,-1,1,0,
+               0,0,-1,1,
+               0,0,0,-1),ncol=4,byrow=TRUE)
+colnames(Vc) <- c("AB","BC","CD","DE")
+rownames(Vc) <- colnames(uc)
+print(Vc)
+@
+All seven explanatory variables (see the help on \texttt{carseg}) are introduced in a meaningful way into the \texttt{Formula}: positive variables are changed to log; \texttt{PAC} is the indicator of an incentive period during which people were encouraged to change their vehicle. The syntax for \texttt{Formula} stems from the \texttt{R}-package {\bf Formula} \citep{Vara2015} and extends the ordinary \texttt{formula} to a multivariate dependent vector. In the \texttt{R}-package {\bf SGB} the left hand side of the formula defines the same model for all log-ratio transforms (left hand side of Equation \ref{modb}). There is the possibility to define different models for each lrt by fixing some coefficients to zero (see Section \ref{sec43}).
+<<>>=
+## Fit a model
+Form1 <- Formula(AB | BC | CD | DE ~  log(expend) + I(PAC*log(expend)) +
+	 log(sent) + log(FBCF) + log(price) + rates)
+obj1 <- regSGB(Form1, data=list(carseg, uc, Vc), shape10 = 4.4, 
+               control.outer = list(trace=FALSE))
+@
+By default the algorithm prints all iterations of the outer loop until convergence (here \texttt{control.outer = list(trace=FALSE)} suppresses the output). The \texttt{print} method for \texttt{regSGB} objects gives the call and the estimated parameters.
+<<>>=
+obj1
+@
+\texttt{summary} is a list with 3 components, the call, the formula and the estimated parameters with two types of standard deviation. Notice that the shape parameters are defined in the compositional space (the simplex), whereas the regression parameters act on log-ratio transforms. The standard deviations \texttt{StdErr1} are based on the inverse of the Hessian obtained numerically with \texttt{R}-package {\bf numDeriv} \citep{numder2016}. \texttt{StdErr2} is the sandwich estimate \citep{Huber1967} which is robust to some departures of the model. In the example, we see that the robust estimate is generally larger than the classical one. The p-values are based on the asymptotic normal distribution for the parameter estimates.
+<<>>=
+## Results
+summary(obj1)
+@
+\texttt{table.regSGB} is a data-frame with the overall results for the fitted object.
+<<>>=
+## Overall results
+t1 <- table.regSGB(obj1)
+print(t1)
+@
+ \texttt{value} is the value of the log-likelihood at the last iteration, \texttt{n.par} is the number of parameters and \texttt{n.par.fixed} the number of fixed parameters (see Example \ref{sec44}); \texttt{AIC} is Akaike's criterion, \texttt{Rsquare} is the ratio of the total variance of the fitted compositions to the observed compositions (see below). The next parameters describe the run: \texttt{convergence} is 0 if the algorithm converged, \texttt{kkt1} is 1, if the first Karush-Kuhn-Tucker condition is met (i.e. the gradient of the log-likelihood is close to zero), \texttt{kkt2} is 1, if the second Karush-Kuhn-Tucker condition is met (i.e. the Hessian is negative definite), \texttt{counts.function} (\texttt{counts.gradient}) is the  number of times the log-likelihood (the gradient) was evaluated.
+
+
+\texttt{Rsquare} \citep {Hijazi2009} is a statistic similar to the ordinary $R^2$ adapted to variables in the simplex. It is based on Aitchison's total variation \citep{Ait1986}, see also \cite{EgoPaw2011}.  More precisely, let $\bU$ be a random composition. Consider the following covariance matrix
+$$ \bGamma =\bGamma(\bU) = (\gamma_{ij})_{i,j=1,...,D} = \Cov\left[\log\left(\frac{\bU}{g(\bU)}\right)\right],$$
+where $g(\bU)$ is the geometric mean of the parts of $\bU$. The total variation of a composition $\bU$ is given by 
+$$\totvar(\bU)=\tr(\bGamma) = \sum_{i=1}^D \gamma_{ii}.$$
+
+The fitted composition $\hat{\bU}$ is defined as the estimated value of the  Aitchison's expectation (see Equation \ref{EU2}). Replacing the parameters by their estimated values, the fitted Aitchison's expectations under the SGB model are obtained with function \texttt{meanAobj.SGB}. Then  \texttt{Rsquare} is given by
+$$\frac{\totvar(\hat{\bU})}{\totvar(\bU)}.$$
+
+Some words of caution on the interpretation of \texttt{Rsquare}: there is no anova table in the SGB (and Dirichlet) context. It can happen that adding parameters decreases \texttt{Rsquare}, which is impossible in ordinary multiple linear regression. Another point is that \texttt{Rsquare} does not depend on a concept like the  degrees of freedom.
+
+
+\begin{figure}[ht!]
+<<>>=
+## Quality of fit
+par(mfrow=c(3,2))
+hzbeta(uc,obj1)
+mtext("Marginal distribution of the z-transform of parts, model obj1",
+	 line=-1,outer=TRUE)
+@
+\caption{Histograms and marginal fitted Beta densities for the $z$-transforms of parts. \label{fig1}}
+\end{figure} 
+The z-transforms of parts $\bz=(z_1,...,z_D)$ were defined in Equation \eqref{sreg}. Under the $SGB(a,\bb,\bp)$ model, they follow a Dirichlet distribution with parameters $\bp=(p_1,...,p_D)$. The marginal distribution of part $z_i,i=1,..,D$ is then $Beta(p_i)$. In Figure \ref{fig1}, histograms of the z-transforms of the compositions \texttt{uc} computed with the parameters estimated in \texttt{obj1} are compared with the beta densities. Notice that the ordinary expectation of $\bz_j$ is $p_j/\sum_{i=1}^D p_i$, and the Aitchison expectation is  $\exp[\psi(p_j)]/\sum_{i=1}^D \exp[\psi(p_i)]$.
+
+\clearpage
+
+\subsection{Regression with isometric log-ratio transform} \label{sec42}
+It is of interest to compare the preceding fit \texttt{obj1} with an similar model based on another log-ratio transform (lrt). Let us choose the matrix $\bV$ in Equation \eqref{modb} in such a way that the columns are orthonormal. The lrt so defined is an isometric log-ratio transform (ilr) \citep{EgoPaw2003}. 
+<<>>=
+## Influence of log-ratio transformation
+# setup a matrix Vilr with orthonormal columns
+Vilr <- contr.helmert(5)
+Vilr <- Vilr%*%diag(1/sqrt(diag(crossprod(Vilr))))
+colnames(Vilr) <- c("A.B","AB.C","A_C.D","A_D.E")
+rownames(Vilr) <- colnames(uc)
+print(Vilr)
+@
+The matrix \texttt{Vilr} is such a $\bV$ matrix. It defines orthogonal contrasts in log of parts (Equation \ref{modb}).
+
+The formula implies the same form of dependence on explanatory variables as before.
+<<>>=
+Form2 <- Formula(A.B | AB.C | A_C.D | A_D.E ~  log(expend) + 
+	I(PAC*log(expend)) + log(sent) + log(FBCF) + log(price) + rates)
+obj2 <-  regSGB(Form2, data = list(carseg, uc, Vilr), shape10 = 4.4,
+                control.outer = list(trace=FALSE))
+t2 <- table.regSGB(obj2)
+## Comparison
+# overall statistics
+cbind(t1,t2)
+@
+The overall statistics show the same log-likelihood \texttt{value} and \texttt{AIC}. The ilr fit \texttt{obj2} needed more iterations than \texttt{obj1}.
+<<>>=
+# fitted parts
+range(obj1[["meanA"]]/obj2[["meanA"]] )
+@
+The ratio of the  fitted parts are very close to 1. Globally, the results do not depend on the chosen lrt (but see Section \ref{sec44}).
+
+\subsection{Different models for the lrt components}\label{sec43}
+The model specified in the formula is the same for all lrt components. It is possible to specialize the model by fixing some of the parameters. For instance, the twelfth parameter in \texttt{obj1} is close to zero. It can be fixed to 0 by specifying the corresponding equality constraint with \texttt{heq=heqb.SGB, heq.jac=heqb.SGB.jac, ind=12} in the call to \texttt{regSGB}, see \texttt{EqualityConstr} in the package documentation for other examples.
+
+
+
+\subsection{Stepwise regression} \label{sec44}
+\texttt{stepSGB} is an attempt to automatize the fixing of parameters in specific models for the lrt components. Starting with a fitted SGB regression, e.g. \texttt{obj1}, \texttt{stepSGB} fixes  the regression parameters to 0, one parameter at a time in the decreasing order of the p-values in the starting model. There is the possibility to also fix \texttt{shape1} to some given value $a$. The Dirichlet parameters \texttt{shape2} cannot be fixed.  At each iteration, the model is fitted and the AIC criterion computed. The procedure stops when the AIC is increasing. 
+<<>>=
+## stepSGB
+# First lrt
+step1 <- stepSGB(obj1, carseg, uc, bound = 2.1, control.outer = list(trace=FALSE))
+round(step1[["tab"]])
+@
+Starting with full model \texttt{obj1}, the procedure stopped after 5 iterations. The best model (minimum AIC) is given at the second last iteration.
+
+A summary gives the results at iteration 4. The standard errors are conditional to the fixed parameters.
+%\clearpage
+<<>>=
+summary(step1[["reg"]][["iter4"]])
+@
+
+<<>>=
+# Second lrt
+step2 <- stepSGB(obj2, carseg, uc, bound = 2.1, control.outer = list(trace=FALSE))
+round(step2[["tab"]])
+@
+If we call \texttt{stepSGB} with full model \texttt{obj2} (with the ilr transforms), we see that 7 parameters can be fixed and that the AIC is slightly smaller than the best AIC in \texttt{step1}. The fixed parameters involve essentially AB.C and A\_C.D.
+%\clearpage
+<<>>=
+summary(step2[["reg"]][["iter7"]])
+@
+
+\subsection{Comparison of fits}
+Two goodness of fit tests are proposed in the \texttt{R}-package {\bf SGB}: Kolmogorov-Smirnov and Cramer-von-Mises. They test the adequation between the Beta distribution with the fitted parameters and the $z(u)$-transforms of parts. The four fits \texttt{obj1}, \texttt{obj2}, \texttt{st14 = step1[["reg"]][["iter4"]]} and \texttt{st27 = step2[["reg"]][["iter7"]]} are compared below with Kolmogorov-Smirnov.
+<<>>=
+## gof  tests
+npar <- length(obj1[["par"]])
+D <- dim(uc)[2]
+np2 <- npar-D+1
+
+# K-S test on obj1
+ks1 <- ks.SGB(uc, shape1=obj1[["par"]][1], shape2=obj1[["par"]][np2:npar],
+              scale=obj1[["scale"]])[["tests"]][,1:2]
+names(ks1) <- c("stat1","pval1")
+
+# K-S test on obj2
+ks2 <- ks.SGB(uc, shape1=obj2[["par"]][1], shape2=obj2[["par"]][np2:npar],
+              scale=obj2[["scale"]])[["tests"]][,1:2]
+names(ks2) <- c("stat2","pval2")
+
+st14 <- step1[["reg"]][["iter4"]]
+st27 <- step2[["reg"]][["iter7"]]
+
+# K-S test on st14
+ks14 <- ks.SGB(uc, shape1=st14[["par"]][1], shape2=st14[["par"]][np2:npar],
+               scale=st14[["scale"]])[["tests"]][,1:2]
+names(ks14) <- c("stat14","pval14")
+
+# K-S test on st2
+ks27 <- ks.SGB(uc, shape1=st27[["par"]][1], shape2=st27[["par"]][np2:npar],
+               scale=st27[["scale"]])[["tests"]][,1:2]
+names(ks27) <- c("stat27","pval27")
+
+## Kolmogorov-Smirnov tests
+round(cbind(ks1,ks2,ks14,ks27),3)
+@
+The four fits perform similarly. For each part, the Beta-distribution is accepted (but remember that the tests are conservative).
+
+\subsection{Imputation of missing parts}\label{sec45}
+Applied to a completely missing composition, \texttt{impute.regSGB} returns the Aitchison expectation (Equation \ref{EU2}).  Applied to a partially missing composition, it returns the conditional Aitchison expectation, given the observed sub-composition (Equation \ref{imput}). 
+Applied to a complete case, it returns the complete case. 
+
+<<>>=
+usup <- carseg[1:3,1:5]
+## Introduce some missing values
+usup[1,2] <- NA
+usup[2,2:3] <- NA
+usup[3,] <- NA
+usup <- usup/rowSums(usup,na.rm=TRUE)
+usup
+impute.regSGB(obj1,carseg[1:3,],usup)
+
+## original values
+carseg[1:3,1:5]
+@
+The reconstructed parts are close to the original ones.
+
+\section{Summary}
+In this paper, the main features of the \texttt{R}-package {\bf SGB} are explained. Regression models based on a generalization of the Dirichlet distribution, called the Simplicial Beta distribution (SGB), are defined and exemplified. Under the SGB, other parameters are added to the Dirichlet shape parameters: an overall shape parameter and a scale composition. Log-ratio transforms of the scale compositions are modeled with auxiliary variables. The shape parameters are the same across compositions. This is in contrast with Dirichlet regressions, where the Dirichlet shapes are the only parameters and are modeled with auxiliary variables. The fitted compositions are given by the Aitchison expectation, i.e. the image in the simplex of the expected log-ratios. These Aitchison expectations depend on all parameters, the shape parameters modifying the constant term in the regressions (see Equation \ref{EU2}). The results in the simplex do not depend on the chosen log-ratio transforms (lrt). Nevertheless the importance of the choice of the lrt appears when different models are specified for its components. This has been exemplified with backward stepwise regressions. The principle is to define first the same overall model for all lrt components and then to set specific regression parameters to zero. It is also possible to fix the overall shape to a given value. The regression parameters are set to zero in decreasing order of their asymptotic p-value. The elimination stops when the AIC criterion increases.
+Notice that the initial p-values are used throughout. The standard deviations of the final model are those of the distribution conditional on the fixed values. SGB regression proves to be quite feasible and flexible. It sheds a new light on the modeling of compositions.
+
+
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Aitchison}{Aitchison}{1986}]{Ait1986}
+Aitchison, J. (1986).
+\newblock {\em {The Statistical Analysis of Compositional Data}}.
+\newblock Monographs on Statistics and Applied Probability. Chapman and Hall
+  Ltd (reprinted 2003 with additional material by the Blackburn Press, London
+  (UK).
+
+\bibitem[\protect\citeauthoryear{Craiu and Craiu}{Craiu and
+  Craiu}{1969}]{Craiu1969}
+Craiu, M. and V.~Craiu (1969).
+\newblock {Repartitia Dirichlet generalizat\'a}.
+\newblock {\em {Analele Universitatii Bucuresti,
+  Mathematic\'a-Mecanic\'a}\/}~{\em 18}, 9--11.
+
+\bibitem[\protect\citeauthoryear{Egozcue and Pawlovsky-Glahn}{Egozcue and
+  Pawlovsky-Glahn}{2011}]{EgoPaw2011}
+Egozcue, J.~J. and V.~Pawlovsky-Glahn (2011).
+\newblock {Chapter 2: Basic concepts and procedures}.
+\newblock In V.~Pawlowsky-Glahn and A.~Buccianti (Eds.), {\em {Compositional
+  data analysis. Theory and applications}}. Wiley.
+
+\bibitem[\protect\citeauthoryear{Egozcue, Pawlowsky-Glahn, Mateu-Figueras, and
+  Barcel\'o-Vidal}{Egozcue et~al.}{2003}]{EgoPaw2003}
+Egozcue, J.~J., V.~Pawlowsky-Glahn, G.~Mateu-Figueras, and C.~Barcel\'o-Vidal
+  (2003).
+\newblock Isometric logratio transformations for compositional data analysis.
+\newblock {\em Mathematical Geology\/}~{\em 35\/}(3), 279--300.
+
+\bibitem[\protect\citeauthoryear{Gilbert and Varadhan}{Gilbert and
+  Varadhan}{2016}]{numder2016}
+Gilbert, P. and R.~Varadhan (2016).
+\newblock {\em numDeriv: Accurate Numerical Derivatives}.
+\newblock R package version 2016.8-1.
+
+\bibitem[\protect\citeauthoryear{Graf}{Graf}{2011}]{Graf2011}
+Graf, M. (2011).
+\newblock {Chapter 9: Use of survey weights for the analysis of compositional
+  data}.
+\newblock In V.~Pawlowsky-Glahn and A.~Buccianti (Eds.), {\em {Compositional
+  data analysis. Theory and applications}}. Wiley.
+
+\bibitem[\protect\citeauthoryear{Graf}{Graf}{2017}]{Graf2017}
+Graf, M. (2017).
+\newblock {A distribution on the simplex of the Generalized Beta type}.
+\newblock In J.~A. Mart\'in-Fern\'andez (Ed.), {\em Proceedings CoDaWork 2017}.
+  University of Girona (Spain).
+
+\bibitem[\protect\citeauthoryear{Gr\"un, Kosmidis, and Zeileis}{Gr\"un
+  et~al.}{2012}]{GrKosZei2012}
+Gr\"un, B., I.~Kosmidis, and A.~Zeileis (2012).
+\newblock {Extended Beta Regression in {R}: Shaken, Stirred, Mixed, and
+  Partitioned}.
+\newblock {\em Journal of Statistical Software\/}~{\em 48\/}(11), 1--25.
+
+\bibitem[\protect\citeauthoryear{Gueorguieva, Rosenheck, and
+  Zelterman}{Gueorguieva et~al.}{2008}]{Gueo2008}
+Gueorguieva, R., R.~Rosenheck, and D.~Zelterman (2008).
+\newblock {Dirichlet Component Regression and its Applications to Psychiatric
+  Data}.
+\newblock {\em {Comput Stat Data Anal.}\/}~{\em 52\/}(12), 5344--5355.
+
+\bibitem[\protect\citeauthoryear{Hijazi and Jernigan}{Hijazi and
+  Jernigan}{2009}]{Hijazi2009}
+Hijazi, R.~H. and R.~W. Jernigan (2009).
+\newblock Modelling compositional data using {D}irichlet regression models.
+\newblock {\em Journal of Applied Probability \& Statistics,\/}~{\em 4\/}(1),
+  77--91.
+
+\bibitem[\protect\citeauthoryear{Huber}{Huber}{1967}]{Huber1967}
+Huber, P.~J. (1967).
+\newblock The behavior of maximum likelihood estimates under nonstandard
+  conditions.
+\newblock In {\em Proceedings of the Fifth Berkeley Symposium on Mathematical
+  Statistics and Probability}, Volume~1, pp.\  221--233.
+
+\bibitem[\protect\citeauthoryear{Kotz, Balakrishnan, and Johnson}{Kotz
+  et~al.}{2000}]{KBJ2000}
+Kotz, S., N.~Balakrishnan, and N.~L. Johnson (2000).
+\newblock {\em {Continuous Multivariate Distributions, Volume 1, Models and
+  Applications}}.
+\newblock John Wiley \& Sons.
+
+\bibitem[\protect\citeauthoryear{Madsen, Nielsen, and Tingleff}{Madsen
+  et~al.}{2004}]{Mad2004}
+Madsen, K., H.~Nielsen, and O.~Tingleff (2004).
+\newblock {Optimization With Constraints}.
+\newblock Informatics and Mathematical Modelling, Technical University of
+  Denmark.
+
+\bibitem[\protect\citeauthoryear{Maier}{Maier}{2015}]{Maier2015}
+Maier, M.~J. (2015).
+\newblock {\em {DirichletReg: Dirichlet Regression in R}}.
+\newblock R package version 0.6-3.1.
+
+\bibitem[\protect\citeauthoryear{Monti, Mateu-Figueras, and
+  Pawlowsky-Glahn}{Monti et~al.}{2011}]{Monti2011}
+Monti, G.~S., G.~Mateu-Figueras, and V.~Pawlowsky-Glahn (2011).
+\newblock {Notes on the scaled Dirichlet distribution}.
+\newblock In V.~Pawlowsky-Glahn and A.~Buccianti (Eds.), {\em {Compositional
+  data analysis. Theory and applications}}. Wiley.
+
+\bibitem[\protect\citeauthoryear{Morais and Thomas-Agnan}{Morais and
+  Thomas-Agnan}{2019}]{MorTho2019}
+Morais, J. and C.~Thomas-Agnan (2019).
+\newblock Impact of economic context on automobile market segment shares: a
+  compositional approach.
+\newblock In press.
+
+\bibitem[\protect\citeauthoryear{Ng, Tian, and Tang}{Ng
+  et~al.}{2011}]{NgTianTang2011}
+Ng, K.~W., G.-L. Tian, and M.-L. Tang (2011).
+\newblock {\em Dirichlet and related distributions: theory, methods and
+  applications}.
+\newblock Wiley series in probability and statistics.
+
+\bibitem[\protect\citeauthoryear{Templ, Hron, and Filzmoser}{Templ
+  et~al.}{2011}]{TemplHronFil2011}
+Templ, M., K.~Hron, and P.~Filzmoser (2011).
+\newblock {\em rob{C}ompositions: an R-package for robust statistical analysis
+  of compositional data}.
+\newblock {J}ohn {W}iley and {S}ons.
+
+\bibitem[\protect\citeauthoryear{{van den Boogaart}, Tolosana, and Bren}{{van
+  den Boogaart} et~al.}{2014}]{Boog2014}
+{van den Boogaart}, K.~G., R.~Tolosana, and M.~Bren (2014).
+\newblock {\em compositions: Compositional Data Analysis}.
+\newblock R package version 1.40-1.
+
+\bibitem[\protect\citeauthoryear{Varadhan}{Varadhan}{2015}]{Vara2015}
+Varadhan, R. (2015).
+\newblock {\em {alabama: Constrained Nonlinear Optimization}}.
+\newblock R package version 2015.3-1.
+
+\bibitem[\protect\citeauthoryear{Wicker, Muller, Kalathur, and Poch}{Wicker
+  et~al.}{2008}]{WickerMKP08}
+Wicker, N., J.~Muller, R.~K.~R. Kalathur, and O.~Poch (2008).
+\newblock {A maximum likelihood approximation method for Dirichlet's parameter
+  estimation}.
+\newblock {\em Computational Statistics {\&} Data Analysis\/}~{\em 52\/}(3),
+  1315--1322.
+
+\bibitem[\protect\citeauthoryear{Zeileis and Croissant}{Zeileis and
+  Croissant}{2010}]{Zeileis2010}
+Zeileis, A. and Y.~Croissant (2010).
+\newblock Extended model formulas in {R}: Multiple parts and multiple
+  responses.
+\newblock {\em Journal of Statistical Software\/}~{\em 34\/}(1), 1--13.
+
+\end{thebibliography}
+
+
+
+\end{document}

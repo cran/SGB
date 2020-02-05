@@ -18,6 +18,10 @@ Maintainer: Monique Graf <monique.p.n.graf@bluewin.ch>
 }
 \references{
 Graf, M. (2017). A distribution on the simplex of the Generalized Beta type. \emph{In J. A. Martin-Fernandez (Ed.), Proceedings CoDaWork 2017}, University of Girona (Spain), 71-90.
+
+Graf, M. (2019). The Simplicial Generalized Beta distribution - R-package SGB and applications. \emph{Proceedings of the 8th International Workshop on Compositional Data Analysis (CoDaWork2019): Terrassa, 3-8 June, 2019. J.J. Egozcue, J. Graffelman and M.I. Ortego (Editors). Universitat Politecnica de Catalunya-BarcelonaTECH, 2019. 202 p. ISBN 978-84-947240-2-2. }.
+
+Graf, M. (2020). Regression for compositions based on a generalization of the Dirichlet distribution. \emph{Statistical Methods & Applications}, (), 1-24.
 }
 
 \examples{

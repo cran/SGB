@@ -1,4 +1,4 @@
-98c255b5e7e4ed108a6c8297cceecdaa *DESCRIPTION
+da94a5ed93c3081c069d9772bcc07771 *DESCRIPTION
 b06eb2028500d92bc137f1b2a9dc462e *NAMESPACE
 08a75002bb869fdaa35bf02314bd5cde *R/B2i.R
 37810ff3182f933d4a9923ee5ecd4d45 *R/EZ.SGB.R
@@ -22,11 +22,11 @@ ed9fbb6adf56a6bfc4f45dbc3cff3e8b *R/gr.SGB.R
 04d52e0bc552b1fc9dc36c94b8afeb16 *R/heqab.SGB.jac.R
 79700e8bc534b4d7a771fb2d6d109956 *R/heqb.SGB.R
 80ac4b1200c63776087bd9b6439c1ae7 *R/heqb.SGB.jac.R
-02ad52d4582fee74e0ce945dce9d0152 *R/hin.SGB.R
+bde70fd15a3b31edbcdd01be52f18246 *R/hin.SGB.R
 c9ecb60352790cd5bf266bc30044ed2e *R/hin.SGB.jac.R
 eb58a86c2e2e64f2b870f2750afbc8de *R/hzbeta.R
 045b865f81ea21a761a57258041b3162 *R/impute.regSGB.R
-800ca04eab64f43166444b77a3dd1308 *R/initpar.SGB.R
+668c7934f2d0d492175318c1ff76326a *R/initpar.SGB.R
 4f6c6aa1266899ae2024c4a3440acaff *R/ks.SGB.R
 0883f15d1eb525da86495b5143717c04 *R/print.regSGB.R
 c3405d0c0cf40bdb47cee6abc7bf23f7 *R/print.testSGB.R
@@ -42,8 +42,8 @@ ee6fe5cc51279a4c3677085ca4c1f7fc *R/stepSGB.R
 57f912b446e0de240a0cd1d76f6b1bfc *R/summary.regSGB.R
 5b4d8004ef2ffd3e9127e02c96d2082d *R/table.regSGB.R
 f9e3a0a61610283bd3562ea78a661de5 *R/zval.R
-68b480d074baf501b99d861107d2b56d *build/partial.rdb
-df75ac7079e5c4d7c1a1455c94804442 *build/vignette.rds
+78786c60d98681142f05f17915c12dad *build/partial.rdb
+7a9857bc5d15cded4f0034eebe1ba383 *build/vignette.rds
 189fd31046bd9160333ee021051a75b8 *data/arc.RData
 18099a7d2c24230fe0547a8ee2e83866 *data/carseg.RData
 0b33fe28df570ae512557fe4ff0f7d65 *data/ocar.RData
@@ -51,7 +51,7 @@ dba28db62947e79b79b1dd87e143ebb5 *data/oilr.RData
 9755e91cd22d9b8d023cfa873e161a98 *inst/doc/SGB-manual.pdf
 e6ea7fc58dbe4fad53eb89f4c6e2130e *inst/doc/vignette.R
 7bfd21ec8ab80f8e8b001ca677b2ce87 *inst/doc/vignette.Rnw
-c39b9614e6b4e3e1922ebfa57f0decb1 *inst/doc/vignette.pdf
+5577faac308faf9fc24f981c11cd071c *inst/doc/vignette.pdf
 f5d67ac2ee66ccb68afc9c87dde3af41 *man/B2i.Rd
 a7d67f812bafb75afd6d6f270589ce0a *man/EZ.SGB.Rd
 3753cadedcd1a94d6544c6bc856d1c26 *man/EqualityConstr.Rd
@@ -61,7 +61,7 @@ af2f9f2919d53fe4d35a33dbd51bb764 *man/GoodnessFit.Rd
 424d30e6fafa67565b097b094e897e7d *man/InequalityConstr.Rd
 e9c5da4f47788ca1d41cd8ccbaaa00e2 *man/InitialParameters.Rd
 a0f72d4472e5e69831408d723bf53e51 *man/MarginPlots.Rd
-1b403a5aeed75c4b7cd3a0d9d78dac20 *man/SGB-package.Rd
+27a31d9aba56978d5c2b08eb547324fd *man/SGB-package.Rd
 7d78331902efb0583104e5c0180382b1 *man/SGBdistrib.Rd
 6993df9650ab6f54d64bc2df1a07ab68 *man/SGBlik.Rd
 b8d0087e05435ad4391d410f77c4aae3 *man/SGButil.Rd
@@ -72,6 +72,6 @@ e72a41faa61f81784dd4bdaa730dd5ec *man/arc.Rd
 fe574040c278359db02d13ac122c49f0 *man/ocar.Rd
 48e5fab89eef08ebebd9f0a03f2bbd3b *man/oilr.Rd
 d9e69c23f70ca3c6cff3570d00bd4597 *man/regSGB.Rd
-90e9bb67a5d95ea71c3d5e75f784075a *man/stepSGB.Rd
+bc07d15a90dfbda2855e94b35627879d *man/stepSGB.Rd
 cff2fb941e996f66e0fcae376b3ed209 *man/summaryA.SGB.Rd
 7bfd21ec8ab80f8e8b001ca677b2ce87 *vignettes/vignette.Rnw

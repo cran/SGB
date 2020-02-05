@@ -55,7 +55,6 @@ maximum number of iterations, i.e. attempts to set a parameter to 0.
  list of control parameters to be used by the outer loop in constrOptim.nl, see \code{\link[alabama]{auglag}}. 
 Default is from \code{auglag}, except \code{list(itmax = 1000, ilack.max = 200)}.
 }
-\item{\dots}{ not used. }
 }
 \details{
 This is an experimental procedure for searching a set of non-significant parameters that will be set to zero. The shape parameters are excluded from the elimination procedure. The algorithm starts with \code{obj0}, output of regSGB.  The p-values for the regression parameters in \code{summary(obj0)} are taken in decreasing order. The parameter with the largest p-value is set to zero and \code{regSGB} computes the regression with this constraint. If the AIC value is smaller than the AIC in \code{obj0}, the parameter with the next largest p-value in \code{obj0} is set to zero and the regression with the two constraints is computed. The process iterates until either a larger AIC is found or \code{maxiter} is attained.\cr

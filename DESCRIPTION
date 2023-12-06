@@ -1,7 +1,7 @@
 Package: SGB
 Type: Package
 Title: Simplicial Generalized Beta Regression
-Version: 1.0.1
+Version: 1.0.1.1
 Date: 2020-02-05
 Author: Monique Graf 
 Maintainer: Monique Graf <monique.p.n.graf@bluewin.ch>
@@ -10,10 +10,9 @@ Depends: Formula
 Imports: stats, MASS, numDeriv, alabama
 Suggests: knitr, goftest
 License: GPL (>= 2)
-Encoding: latin1
 LazyData: true
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-02-05 13:34:14 UTC; monique
+Packaged: 2023-12-06 09:04:24 UTC; hornik
 Repository: CRAN
-Date/Publication: 2020-02-05 15:20:02 UTC
+Date/Publication: 2023-12-06 09:37:49 UTC
